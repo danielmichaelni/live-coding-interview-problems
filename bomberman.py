@@ -15,6 +15,8 @@ E 0 W E
 return 3. (Placing a bomb at (1,1) kills 3 enemies)
 """
 
+# time complexity: O((m * n)(m + n))
+# space complexity: O(1)
 def best_bomb(grid):
     max_enemies_killed = 0
     for x in range(len(grid)):
@@ -58,7 +60,56 @@ def bomb(grid, x, y):
         j += 1
     return enemies_killed
 
-# runtime: O((m * n)(m + n))
+# time complexity: O(m * n)
+# space complexity: O(m * n)
+def best_bomb_optimized(grid):
+    max_enemies_killed = 0
+    row_kill_scores = get_row_kill_scores(grid)
+    col_kill_scores = get_col_kill_scores(grid)
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            tmp = row_kill_scores[i][j] + col_kill_scores[i][j]
+            if tmp > max_enemies_killed:
+                max_enemies_killed = tmp
+    return max_enemies_killed
+
+def get_row_kill_scores(grid):
+    kill_scores = [[0 for j in range(len(grid[0]))] for i in range(len(grid))]
+    for i in range(len(grid)):
+        start = 0
+        enemies_killed = 0
+        for j in range(len(grid[0])):
+            if grid[i][j] == 'E':
+                enemies_killed += 1
+            elif grid[i][j] == 'W':
+                for k in range(start, j):
+                    if grid[i][k] == '0':
+                        kill_scores[i][k] = enemies_killed
+                start = j
+                enemies_killed = 0
+        for k in range(start, len(grid[0])):
+            if grid[i][k] == '0':
+                kill_scores[i][k] = enemies_killed
+    return kill_scores
+
+def get_col_kill_scores(grid):
+    kill_scores = [[0 for j in range(len(grid[0]))] for i in range(len(grid))]
+    for j in range(len(grid[0])):
+        start = 0
+        enemies_killed = 0
+        for i in range(len(grid)):
+            if grid[i][j] == 'E':
+                enemies_killed += 1
+            elif grid[i][j] == 'W':
+                for k in range(start, i):
+                    if grid[k][j] == '0':
+                        kill_scores[k][j] = enemies_killed
+                start = i
+                enemies_killed = 0
+        for k in range(start, len(grid)):
+            if grid[k][j] == '0':
+                kill_scores[k][j] = enemies_killed
+    return kill_scores
 
 grid = [['0', 'E', '0', '0'],
         ['E', '0', 'W', 'E'],
@@ -68,5 +119,5 @@ grid2 = [['0', '0', '0'],
          ['W', 'W', 'E'],
          ['W', 'E', '0']]
 
-print(best_bomb(grid) == 3)
-print(best_bomb(grid2) == 2)
+print(best_bomb_optimized(grid) == 3)
+print(best_bomb_optimized(grid2) == 2)
